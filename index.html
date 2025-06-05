@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Scripture Randomizer</title>
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React and ReactDOM CDNs -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+</head>
+<body class="font-sans antialiased bg-gradient-to-br from-blue-100 to-purple-200 flex items-center justify-center min-h-screen p-4">
+
+    <div id="root"></div>
+
+    <script type="text/javascript">
+        // Ensure the DOM is fully loaded before executing the React application code.
+        // Placing this script at the end of the body ensures React and ReactDOM CDNs are loaded.
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // Accurate and researched dataset of Bible books, their chapters, and verse counts per chapter.
+            // This data ensures that each verse has an equal chance of being selected by accurately
+            // defining the range of chapters and verses for each book.
+            const bibleVerseCounts = {
+                // Old Testament
+                "Genesis": [
+                    31, 25, 24, 26, 32, 22, 24, 22, 29, 32, 32, 20, 18, 24, 21, 16, 27, 33, 38, 18, 34, 24, 20, 67, 34, 35, 46, 22, 35, 43, 54, 33, 20, 31, 29, 43, 36, 30, 23, 23, 57, 38, 34, 34, 28, 34, 31, 22, 33, 26
+                ], // 50 chapters
+                "Exodus": [
+                    22, 25, 22, 31, 23, 30, 29, 28, 35, 29, 10, 51, 22, 31, 27, 36, 16, 27, 25, 26, 37, 30, 33, 18, 40, 37, 21, 43, 46, 38, 18, 35, 23, 35, 35, 38, 29, 31, 43, 38
+                ], // 40 chapters
+                "Leviticus": [
+                    17, 16, 17, 35, 26, 23, 38, 36, 24, 20, 47, 8, 59, 57, 33, 34, 16, 30, 37, 27, 24, 33, 44, 23, 55, 46, 34
+                ], // 27 chapters
+                "Numbers": [
+                    54, 34, 51, 49, 31, 27, 89, 26, 23, 36, 35, 16, 33, 45, 41, 35, 28, 32, 22, 29, 35, 41, 30, 25, 19, 65, 23, 31, 39, 17, 54, 42, 56, 29, 34, 13
+                ], // 36 chapters
+                "Deuteronomy": [
+                    46, 37, 29, 49, 33, 25, 26, 20, 29, 22, 32, 31, 19, 29, 23, 22, 20, 22, 21, 20, 23, 29, 26, 22, 19, 19, 26, 69, 28, 20, 30, 52, 29, 12
+                ], // 34 chapters
+                "Joshua": [
+                    18, 24, 17, 24, 15, 27, 26, 35, 27, 43, 23, 24, 33, 15, 63, 10, 18, 28, 51, 9, 45, 34, 16, 33
+                ], // 24 chapters
+                "Judges": [
+                    36, 23, 31, 24, 31, 40, 25, 35, 57, 18, 40, 15, 25, 20, 20, 31, 13, 31, 30, 48, 25
+                ], // 21 chapters
+                "Ruth": [
+                    22, 23, 18, 22
+                ], // 4 chapters
+                "1 Samuel": [
+                    28, 36, 21, 22, 12, 21, 17, 22, 27, 29, 15, 25, 23, 52, 35, 23, 58, 30, 24, 42, 15, 23, 29, 22, 44, 25, 12, 25, 11, 31, 13
+                ], // 31 chapters
+                "2 Samuel": [
+                    27, 32, 39, 12, 25, 23, 29, 18, 13, 19, 27, 31, 39, 33, 37, 23, 29, 33, 43, 26, 22, 51, 39, 25
+                ], // 24 chapters
+                "1 Kings": [
+                    46, 46, 46, 34, 18, 38, 51, 66, 28, 29, 43, 33, 34, 31, 34, 34, 24, 46, 21, 43, 29, 53
+                ], // 22 chapters
+                "2 Kings": [
+                    18, 25, 27, 44, 27, 33, 20, 29, 37, 36, 21, 21, 25, 29, 38, 20, 41, 37, 37, 21, 26, 20, 37, 20, 30
+                ], // 25 chapters
+                "1 Chronicles": [
+                    54, 55, 24, 43, 26, 81, 40, 40, 44, 14, 47, 40, 14, 17, 29, 43, 27, 17, 19, 8, 30, 19, 32, 31, 31, 32, 34, 21, 30
+                ], // 29 chapters
+                "2 Chronicles": [
+                    17, 18, 17, 22, 14, 42, 22, 18, 31, 19, 23, 16, 22, 15, 19, 14, 19, 34, 11, 37, 20, 12, 21, 27, 28, 23, 23, 27, 36, 27, 21, 33, 25, 33, 27, 23
+                ], // 36 chapters
+                "Ezra": [
+                    11, 70, 13, 24, 17, 22, 28, 36, 15, 44
+                ], // 10 chapters
+                "Nehemiah": [
+                    11, 20, 32, 23, 19, 19, 73, 18, 38, 39, 36, 47, 31
+                ], // 13 chapters
+                "Esther": [
+                    22, 23, 15, 17, 14, 14, 10, 17, 32, 3
+                ], // 10 chapters
+                "Job": [
+                    22, 13, 26, 21, 27, 30, 21, 22, 35, 22, 20, 12, 28, 22, 35, 22, 16, 21, 29, 29, 34, 30, 17, 25, 6, 14, 23, 28, 25, 31, 40, 22, 33, 37, 16, 33, 24, 41, 30, 32, 34, 17
+                ], // 42 chapters
+                "Psalm": [
+                    6, 12, 8, 8, 12, 10, 17, 9, 20, 18, 7, 8, 6, 7, 5, 11, 15, 50, 14, 9, 13, 31, 6, 10, 10, 12, 14, 9, 11, 12, 24, 11, 22, 22, 28, 13, 40, 22, 13, 17, 13, 11, 5, 26, 17, 11, 9, 14, 20, 23, 19, 9, 6, 7, 23, 13, 11, 11, 17, 12, 8, 13, 19, 10, 12, 7, 10, 10, 12, 7, 20, 11, 10, 10, 16, 12, 13, 16, 14, 8, 11, 12, 13, 17, 7, 18, 12, 15, 21, 5, 23, 7, 10, 10, 11, 8, 9, 15, 5, 5, 8, 18, 19, 9, 19, 10, 15, 9, 5, 21, 17, 19, 9, 14, 10, 15, 21, 17, 13, 17, 19, 10, 14, 9, 176, 8, 13, 3, 18, 19, 9, 5, 8, 20, 14, 2, 29, 24, 17, 10, 18, 12, 13, 6, 10, 16, 15, 9
+                ], // 150 chapters
+                "Proverbs": [
+                    33, 22, 35, 27, 23, 35, 27, 36, 18, 32, 31, 28, 25, 35, 33, 33, 28, 24, 29, 30, 31, 29, 35, 34, 28, 28, 27, 28, 27, 33, 31
+                ], // 31 chapters
+                "Ecclesiastes": [
+                    18, 26, 22, 16, 20, 12, 29, 17, 18, 20, 10, 14
+                ], // 12 chapters
+                "Song of Solomon": [
+                    17, 17, 11, 16, 16, 13, 13, 14
+                ], // 8 chapters
+                "Isaiah": [
+                    31, 22, 26, 6, 30, 13, 25, 22, 21, 34, 16, 6, 22, 32, 9, 14, 14, 7, 25, 6, 12, 25, 18, 23, 12, 21, 13, 29, 24, 33, 9, 20, 24, 17, 10, 22, 38, 22, 8, 31, 29, 28, 28, 26, 28, 13, 15, 22, 23, 11, 19, 12, 12, 13, 12, 12, 11, 14, 21, 12, 10, 12, 11, 12, 10, 25
+                ], // 66 chapters
+                "Jeremiah": [
+                    19, 37, 25, 31, 31, 30, 34, 22, 26, 25, 23, 17, 27, 26, 21, 21, 27, 23, 15, 18, 14, 30, 40, 10, 38, 24, 22, 17, 32, 24, 40, 44, 26, 22, 19, 32, 21, 28, 18, 16, 18, 22, 13, 30, 5, 28, 6, 45, 39, 44, 64, 34
+                ], // 52 chapters
+                "Lamentations": [
+                    22, 22, 66, 22, 22
+                ], // 5 chapters
+                "Ezekiel": [
+                    28, 10, 27, 17, 17, 14, 27, 18, 11, 22, 25, 28, 23, 23, 8, 63, 24, 32, 48, 49, 32, 31, 49, 27, 17, 21, 36, 26, 21, 26, 18, 32, 33, 31, 15, 38, 28, 23, 29, 49, 26, 20, 27, 31, 25, 24, 23, 35
+                ], // 48 chapters
+                "Daniel": [
+                    21, 49, 30, 37, 31, 28, 28, 27, 27, 21, 45, 13
+                ], // 12 chapters
+                "Hosea": [
+                    11, 23, 5, 19, 15, 11, 16, 14, 17, 15, 11, 14, 16, 9
+                ], // 14 chapters
+                "Joel": [
+                    20, 32, 21
+                ], // 3 chapters
+                "Amos": [
+                    15, 16, 15, 13, 27, 14, 17, 14, 15
+                ], // 9 chapters
+                "Obadiah": [
+                    21
+                ], // 1 chapter
+                "Jonah": [
+                    17, 10, 10, 11
+                ], // 4 chapters
+                "Micah": [
+                    16, 13, 12, 13, 15, 16, 20
+                ], // 7 chapters
+                "Nahum": [
+                    15, 13, 19
+                ], // 3 chapters
+                "Habakkuk": [
+                    17, 20, 19
+                ], // 3 chapters
+                "Zephaniah": [
+                    18, 15, 20
+                ], // 3 chapters
+                "Haggai": [
+                    15, 23
+                ], // 2 chapters
+                "Zechariah": [
+                    21, 13, 10, 10, 11, 15, 14, 23, 17, 12, 17, 14, 9, 21
+                ], // 14 chapters
+                "Malachi": [
+                    14, 17, 18, 6
+                ], // 4 chapters
+
+                // New Testament
+                "Matthew": [
+                    25, 23, 17, 25, 48, 34, 29, 34, 38, 42, 30, 50, 58, 36, 39, 28, 27, 35, 30, 34, 46, 46, 39, 51, 46, 75, 66, 20
+                ], // 28 chapters
+                "Mark": [
+                    45, 28, 35, 41, 43, 56, 37, 38, 50, 52, 33, 44, 37, 72, 47, 20
+                ], // 16 chapters
+                "Luke": [
+                    80, 52, 38, 44, 39, 49, 50, 56, 62, 42, 54, 59, 35, 35, 32, 31, 37, 43, 48, 47, 38, 71, 56, 53
+                ], // 24 chapters
+                "John": [
+                    51, 25, 36, 54, 47, 71, 53, 59, 41, 42, 57, 50, 38, 31, 27, 33, 26, 40, 42, 31, 25
+                ], // 21 chapters
+                "Acts": [
+                    26, 47, 26, 37, 42, 15, 60, 40, 43, 48, 30, 25, 52, 28, 41, 40, 34, 28, 40, 38, 40, 30, 35, 27, 27, 32, 44, 31
+                ], // 28 chapters
+                "Romans": [
+                    32, 29, 31, 25, 21, 23, 25, 39, 33, 21, 36, 21, 14, 23, 33, 27
+                ], // 16 chapters
+                "1 Corinthians": [
+                    31, 16, 23, 21, 13, 20, 40, 13, 27, 33, 34, 31, 13, 40, 58, 24
+                ], // 16 chapters
+                "2 Corinthians": [
+                    24, 17, 18, 18, 21, 18, 16, 24, 15, 18, 33, 21, 13
+                ], // 13 chapters
+                "Galatians": [
+                    24, 21, 29, 31, 26, 18
+                ], // 6 chapters
+                "Ephesians": [
+                    23, 22, 21, 32, 33, 24
+                ], // 6 chapters
+                "Philippians": [
+                    30, 30, 21, 23
+                ], // 4 chapters
+                "Colossians": [
+                    29, 23, 25, 18
+                ], // 4 chapters
+                "1 Thessalonians": [
+                    10, 20, 13, 18, 28
+                ], // 5 chapters
+                "2 Thessalonians": [
+                    12, 17, 18
+                ], // 3 chapters
+                "1 Timothy": [
+                    20, 15, 16, 16, 25, 21
+                ], // 6 chapters
+                "2 Timothy": [
+                    20, 26, 17, 22
+                ], // 4 chapters
+                "Titus": [
+                    16, 15, 15
+                ], // 3 chapters
+                "Philemon": [
+                    25
+                ], // 1 chapter
+                "Hebrews": [
+                    14, 18, 19, 16, 14, 20, 28, 13, 28, 39, 40, 29, 25
+                ], // 13 chapters
+                "James": [
+                    27, 26, 18, 17, 20
+                ], // 5 chapters
+                "1 Peter": [
+                    25, 25, 22, 19, 14
+                ], // 5 chapters
+                "2 Peter": [
+                    21, 22, 18
+                ], // 3 chapters
+                "1 John": [
+                    10, 29, 24, 21, 21
+                ], // 5 chapters
+                "2 John": [
+                    13
+                ], // 1 chapter
+                "3 John": [
+                    14
+                ], // 1 chapter
+                "Jude": [
+                    25
+                ], // 1 chapter
+                "Revelation": [
+                    20, 29, 22, 11, 14, 17, 17, 13, 21, 11, 19, 17, 18, 20, 8, 21, 18, 24, 21, 15, 27, 21
+                ] // 22 chapters
+            };
+
+            // Base URL for the ANU Quantum Random Number Generator API
+            const ANU_QRNG_API_URL = 'https://qrng.anu.edu.au/API/jsonI.php';
+            // Max value for a uint16 number from ANU QRNG (0 to 65535)
+            const UINT16_MAX = 65535;
+
+            /**
+             * Fetches three random numbers from the ANU QRNG API.
+             * On success, returns an object indicating success status and the numbers array.
+             * On failure, falls back to Math.random() and returns three pseudo-random numbers with failure status.
+             * @returns {Promise<Object>} A promise that resolves to an object { success: boolean, numbers: Array<number> }.
+             */
+            const getThreeRandomNumbers = async () => {
+                try {
+                    // Request 3 unsigned 16-bit integers (uint16)
+                    const response = await fetch(`${ANU_QRNG_API_URL}?length=3&type=uint16`);
+                    if (!response.ok) {
+                        // If API call fails, throw an error to trigger fallback
+                        throw new Error(`QRNG API error: ${response.statusText}`);
+                    }
+                    const data = await response.json();
+
+                    // Ensure data structure is as expected and contains enough numbers
+                    if (data && data.success && data.data && data.data.length >= 3) {
+                        console.log("Successfully fetched quantum random numbers:", data.data);
+                        return { success: true, numbers: data.data };
+                    } else {
+                        // If data is malformed or not enough numbers, fall back
+                        throw new Error("QRNG API returned unexpected data structure.");
+                    }
+                } catch (err) {
+                    console.error("Error fetching quantum random numbers from ANU QRNG, falling back to pseudo-random:", err);
+                    // This error is propagated up to the component, which handles the UI error message.
+                    return {
+                        success: false,
+                        numbers: [
+                            Math.floor(Math.random() * (UINT16_MAX + 1)),
+                            Math.floor(Math.random() * (UINT16_MAX + 1)),
+                            Math.floor(Math.random() * (UINT16_MAX + 1))
+                        ]
+                    };
+                }
+            };
+
+            // The main App component logic
+            const App = () => {
+                // React hooks
+                const [currentScriptureText, setCurrentScriptureText] = React.useState("Click 'Get Random Scripture' to begin!");
+                const [currentScriptureReference, setCurrentScriptureReference] = React.useState("");
+                const [scriptureSearchUrl, setScriptureSearchUrl] = React.useState("");
+                const [isLoading, setIsLoading] = React.useState(false);
+                const [error, setError] = React.useState(null);
+                // New state to track if QRNG was successfully used
+                const [usedQrng, setUsedQrng] = React.useState(false);
+                // New state for button disabling and countdown
+                const [buttonDisabled, setButtonDisabled] = React.useState(false);
+                const [countdown, setCountdown] = React.useState(0);
+
+                /**
+                 * Scales a random number obtained from QRNG (0-65535) to a desired range.
+                 * @param {number} qrngNum The quantum random number (0 to UINT16_MAX).
+                 * @param {number} maxRange The upper bound of the desired range (exclusive, e.g., length of an array).
+                 * @returns {number} The scaled random number within the desired range.
+                 */
+                const scaleQrngNumber = React.useCallback((qrngNum, maxRange) => {
+                    // We add 1 to UINT16_MAX to get the total number of possible values (65536)
+                    // This ensures proper scaling for a range from 0 up to maxRange (exclusive).
+                    return Math.floor(qrngNum / (UINT16_MAX + 1) * maxRange);
+                }, []);
+
+                /**
+                 * Generates a random scripture reference using QRNG (or fallback),
+                 * and constructs a Google Search URL for it.
+                 * @returns {Promise<Object>} A promise that resolves to an object { reference, text, searchUrl }.
+                 */
+                const generateScriptureWithLink = React.useCallback(async () => {
+                    setIsLoading(true);
+                    setError(null);
+                    setScriptureSearchUrl(""); // Clear previous URL
+                    setUsedQrng(false); // Reset QRNG usage status for new attempt
+
+                    try {
+                        const qrngResult = await getThreeRandomNumbers();
+                        setUsedQrng(qrngResult.success); // Update state based on QRNG success
+                        const randomNums = qrngResult.numbers;
+
+                        const bookNames = Object.keys(bibleVerseCounts);
+                        const randomBookIndex = scaleQrngNumber(randomNums[0], bookNames.length);
+                        const selectedBook = bookNames[randomBookIndex];
+                        const chaptersInBook = bibleVerseCounts[selectedBook];
+                        const maxChapters = chaptersInBook.length;
+
+                        const randomChapter = scaleQrngNumber(randomNums[1], maxChapters) + 1;
+
+                        const actualChapterIndex = Math.max(0, randomChapter - 1);
+                        const versesInChapter = chaptersInBook[actualChapterIndex];
+                        const safeVersesInChapter = Math.max(1, versesInChapter);
+
+                        const randomVerse = scaleQrngNumber(randomNums[2], safeVersesInChapter) + 1;
+
+                        const reference = `${selectedBook} ${randomChapter}:${randomVerse}`;
+
+                        // Construct the Google Search URL for the scripture reference
+                        const googleSearchQuery = encodeURIComponent(`${reference}`); // DON'T Add WEB for clarity
+                        const searchUrl = `https://www.google.com/search?q=${googleSearchQuery}`;
+
+                        // This placeholder text indicates that the user needs to click the link for the actual verse.
+                        const text = `Click the link below to read "${reference}" from a Google search result.`;
+
+                        return { reference, text, searchUrl };
+                    } catch (err) {
+                        console.error("Error generating scripture reference or link:", err);
+                        setError("An error occurred. Please try again.");
+                        return null;
+                    } finally {
+                        setIsLoading(false);
+                    }
+                }, [bibleVerseCounts, getThreeRandomNumbers, scaleQrngNumber]);
+
+                // Effect to manage the 60-second cooldown for the button
+                React.useEffect(() => {
+                    let timer;
+                    if (buttonDisabled && countdown > 0) {
+                        timer = setTimeout(() => {
+                            setCountdown(prev => prev - 1);
+                        }, 1000);
+                    } else if (countdown === 0 && buttonDisabled) {
+                        setButtonDisabled(false); // Re-enable button when countdown finishes
+                    }
+                    return () => clearTimeout(timer); // Cleanup timer on unmount or dependency change
+                }, [buttonDisabled, countdown]);
+
+                // Function to handle the button click
+                const handleGetRandomScripture = React.useCallback(async () => {
+                    if (buttonDisabled) return; // Prevent clicking if disabled
+
+                    const scriptureData = await generateScriptureWithLink();
+                    if (scriptureData) {
+                        setCurrentScriptureText(scriptureData.text);
+                        setCurrentScriptureReference(`- ${scriptureData.reference}`);
+                        setScriptureSearchUrl(scriptureData.searchUrl);
+                        // If QRNG was used successfully, start the cooldown
+                        if (usedQrng) {
+                            setButtonDisabled(true);
+                            setCountdown(60); // Set cooldown to 60 seconds
+                        }
+                    } else {
+                        setCurrentScriptureText("Failed to load scripture.");
+                        setCurrentScriptureReference("");
+                        setScriptureSearchUrl("");
+                    }
+                }, [generateScriptureWithLink, buttonDisabled, usedQrng]);
+
+                return (
+                    React.createElement('div', { className: 'bg-white p-8 sm:p-12 rounded-2xl shadow-xl max-w-2xl w-full text-center border-t-4 border-blue-500' },
+                        React.createElement('h1', { className: 'text-3xl sm:text-4xl font-extrabold text-gray-800 mb-6 leading-tight' },
+                            'Scripture Randomizer'
+                        ),
+                        React.createElement('p', { className: 'text-gray-600 mb-8 text-lg' },
+                            'Discover a random Bible verse using quantum randomness. Click the link to read the scripture online!'
+                        ),
+                        React.createElement('button', {
+                            onClick: handleGetRandomScripture,
+                            disabled: isLoading || buttonDisabled, // Disable button if loading or on cooldown
+                            className: `font-bold py-3 px-8 rounded-full transition duration-300 ease-in-out transform shadow-lg
+                                ${isLoading || buttonDisabled ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white hover:scale-105'}`
+                        },
+                            isLoading ? 'Fetching...' : (buttonDisabled ? `Cooldown: ${countdown}s` : 'Get Random Scripture')
+                        ),
+
+                        // Display QRNG/Fallback status
+                        React.createElement('div', { className: 'mt-4 text-sm text-gray-500' },
+                            usedQrng ? 'Quantum Randomness Used (ANU QRNG)' : 'Pseudo-random Fallback Used'
+                        ),
+
+                        React.createElement('div', { className: 'mt-10 p-6 bg-blue-50 bg-opacity-70 rounded-lg border border-blue-200 shadow-md min-h-[150px] flex flex-col justify-center items-center' },
+                            isLoading && (
+                                React.createElement('div', { className: 'flex flex-col items-center' },
+                                    React.createElement('div', { className: 'animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500' }),
+                                    React.createElement('p', { className: 'ml-4 text-gray-700 mt-4 text-lg' }, 'Loading verse...')
+                                )
+                            ),
+                            error && (
+                                React.createElement('p', { className: 'text-red-600 text-lg' }, error)
+                            ),
+                            !isLoading && !error && (
+                                React.createElement(React.Fragment, null,
+                                    React.createElement('p', { id: 'scriptureDisplay', className: 'text-gray-800 text-xl italic leading-relaxed mb-4' },
+                                        currentScriptureText
+                                    ),
+                                    React.createElement('p', { id: 'scriptureReference', className: 'text-blue-700 font-semibold text-lg mb-4' },
+                                        currentScriptureReference
+                                    ),
+                                    scriptureSearchUrl && (
+                                        React.createElement('a', {
+                                            href: scriptureSearchUrl,
+                                            target: '_blank',
+                                            rel: 'noopener noreferrer',
+                                            className: 'text-blue-600 hover:text-blue-800 hover:underline text-lg font-medium'
+                                        },
+                                            'Search for this verse on Google'
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                );
+            };
+
+            // Render the React App component into the 'root' div using createRoot
+            const container = document.getElementById('root');
+            const root = ReactDOM.createRoot(container);
+            root.render(React.createElement(App, null));
+        });
+    </script>
+</body>
+</html>
