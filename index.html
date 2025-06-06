@@ -274,10 +274,11 @@
                 // React hooks
                 const [currentScriptureText, setCurrentScriptureText] = React.useState("Click 'Get Random Scripture' to begin!");
                 const [currentScriptureReference, setCurrentScriptureReference] = React.useState("");
-                const [scriptureSearchUrl, setScriptureSearchUrl] = React.useState("");
+                // State to hold the iframe source URL
+                const [iframeSrc, setIframeSrc] = React.useState("");
                 const [isLoading, setIsLoading] = React.useState(false);
                 const [error, setError] = React.useState(null);
-                // New state to track if QRNG was successfully used
+                // State to track if QRNG was successfully used
                 const [usedQrng, setUsedQrng] = React.useState(false);
                 // New state for button disabling and countdown
                 const [buttonDisabled, setButtonDisabled] = React.useState(false);
@@ -297,13 +298,13 @@
 
                 /**
                  * Generates a random scripture reference using QRNG (or fallback),
-                 * and constructs a Google Search URL for it.
-                 * @returns {Promise<Object>} A promise that resolves to an object { reference, text, searchUrl }.
+                 * and constructs the Bible Gateway iframe URL for it.
+                 * @returns {Promise<Object>} A promise that resolves to an object { reference, iframeUrl }.
                  */
-                const generateScriptureWithLink = React.useCallback(async () => {
+                const generateScriptureWithIframeUrl = React.useCallback(async () => {
                     setIsLoading(true);
                     setError(null);
-                    setScriptureSearchUrl(""); // Clear previous URL
+                    setIframeSrc(""); // Clear previous iframe source
                     setUsedQrng(false); // Reset QRNG usage status for new attempt
 
                     try {
@@ -327,16 +328,12 @@
 
                         const reference = `${selectedBook} ${randomChapter}:${randomVerse}`;
 
-                        // Construct the Google Search URL for the scripture reference
-                        const googleSearchQuery = encodeURIComponent(`${reference}`); // DON'T Add WEB for clarity
-                        const searchUrl = `https://www.google.com/search?q=${googleSearchQuery}`;
+                        // Construct the Bible Gateway iframe URL
+                        const iframeUrl = `https://www.biblegateway.com/passage/?search=${encodeURIComponent(selectedBook)}%20${randomChapter}:${randomVerse}&version=NIV`;
 
-                        // This placeholder text indicates that the user needs to click the link for the actual verse.
-                        const text = `Click the link below to read "${reference}" from a Google search result.`;
-
-                        return { reference, text, searchUrl };
+                        return { reference, iframeUrl };
                     } catch (err) {
-                        console.error("Error generating scripture reference or link:", err);
+                        console.error("Error generating scripture reference or iframe URL:", err);
                         setError("An error occurred. Please try again.");
                         return null;
                     } finally {
@@ -361,11 +358,11 @@
                 const handleGetRandomScripture = React.useCallback(async () => {
                     if (buttonDisabled) return; // Prevent clicking if disabled
 
-                    const scriptureData = await generateScriptureWithLink();
+                    const scriptureData = await generateScriptureWithIframeUrl();
                     if (scriptureData) {
-                        setCurrentScriptureText(scriptureData.text);
-                        setCurrentScriptureReference(`- ${scriptureData.reference}`);
-                        setScriptureSearchUrl(scriptureData.searchUrl);
+                        setCurrentScriptureText(`Loading "${scriptureData.reference}" from Bible Gateway...`);
+                        setCurrentScriptureReference(`- ${scriptureData.reference} (NIV via Bible Gateway)`);
+                        setIframeSrc(scriptureData.iframeUrl);
                         // If QRNG was used successfully, start the cooldown
                         if (usedQrng) {
                             setButtonDisabled(true);
@@ -374,9 +371,9 @@
                     } else {
                         setCurrentScriptureText("Failed to load scripture.");
                         setCurrentScriptureReference("");
-                        setScriptureSearchUrl("");
+                        setIframeSrc("");
                     }
-                }, [generateScriptureWithLink, buttonDisabled, usedQrng]);
+                }, [generateScriptureWithIframeUrl, buttonDisabled, usedQrng]);
 
                 return (
                     React.createElement('div', { className: 'bg-white p-8 sm:p-12 rounded-2xl shadow-xl max-w-2xl w-full text-center border-t-4 border-blue-500' },
@@ -384,7 +381,7 @@
                             'Scripture Randomizer'
                         ),
                         React.createElement('p', { className: 'text-gray-600 mb-8 text-lg' },
-                            'Discover a random Bible verse using quantum randomness. Click the link to read the scripture online!'
+                            'Discover a random Bible verse using quantum randomness, displayed directly from Bible Gateway!'
                         ),
                         React.createElement('button', {
                             onClick: handleGetRandomScripture,
@@ -400,7 +397,7 @@
                             usedQrng ? 'Quantum Randomness Used (ANU QRNG)' : 'Pseudo-random Fallback Used'
                         ),
 
-                        React.createElement('div', { className: 'mt-10 p-6 bg-blue-50 bg-opacity-70 rounded-lg border border-blue-200 shadow-md min-h-[150px] flex flex-col justify-center items-center' },
+                        React.createElement('div', { className: 'mt-10 p-6 bg-blue-50 bg-opacity-70 rounded-lg border border-blue-200 shadow-md min-h-[300px] flex flex-col justify-center items-center overflow-hidden' }, // Min height adjusted for iframe
                             isLoading && (
                                 React.createElement('div', { className: 'flex flex-col items-center' },
                                     React.createElement('div', { className: 'animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500' }),
@@ -412,21 +409,19 @@
                             ),
                             !isLoading && !error && (
                                 React.createElement(React.Fragment, null,
-                                    React.createElement('p', { id: 'scriptureDisplay', className: 'text-gray-800 text-xl italic leading-relaxed mb-4' },
-                                        currentScriptureText
-                                    ),
                                     React.createElement('p', { id: 'scriptureReference', className: 'text-blue-700 font-semibold text-lg mb-4' },
                                         currentScriptureReference
                                     ),
-                                    scriptureSearchUrl && (
-                                        React.createElement('a', {
-                                            href: scriptureSearchUrl,
-                                            target: '_blank',
-                                            rel: 'noopener noreferrer',
-                                            className: 'text-blue-600 hover:text-blue-800 hover:underline text-lg font-medium'
-                                        },
-                                            'Search for this verse on Google'
-                                        )
+                                    iframeSrc && (
+                                        React.createElement('iframe', {
+                                            id: 'bibleGatewayIframe',
+                                            src: iframeSrc,
+                                            title: `Bible Gateway Passage: ${currentScriptureReference}`,
+                                            className: 'w-full h-96 border-2 border-blue-300 rounded-lg shadow-inner', // Responsive width, fixed height for consistency
+                                            // Optional: sandbox attribute can add extra security, but might restrict functionality if not carefully configured.
+                                            // For now, we'll rely on Bible Gateway's embed policy.
+                                            // sandbox="allow-scripts allow-same-origin"
+                                        })
                                     )
                                 )
                             )
