@@ -8,25 +8,37 @@ const PORT = process.env.PORT || 3000;
 const app = express();
 app.use(express.static('public'));
 
-// Load KJV Bible data
-const kjvPath = path.join(__dirname, 'bible', 'kjv.json');
-const kjv = JSON.parse(fs.readFileSync(kjvPath, 'utf8'));
-const numVerses = kjv.length;
+// --- Load and flatten KJV Bible data ---
+const kjvData = JSON.parse(fs.readFileSync(path.join(__dirname, 'bible', 'kjv.json'), 'utf8'));
+const flatKJV = [];
+kjvData.book.forEach(bookObj => {
+  bookObj.chapters.forEach(chapObj => {
+    chapObj.verses.forEach(verseObj => {
+      flatKJV.push({
+        book: bookObj.name,
+        chapter: chapObj.chapter,
+        verse: verseObj.verse,
+        text: verseObj.text
+      });
+    });
+  });
+});
+const numVerses = flatKJV.length;
 
-// Load Liber Legis fallback, if present
+// --- Load Liber Legis fallback, if present ---
 const liberPath = path.join(__dirname, 'liber', 'liber_legis.json');
 let liber = null;
 if (fs.existsSync(liberPath)) {
   liber = JSON.parse(fs.readFileSync(liberPath, 'utf8'));
 }
 
+// --- Quantum random helper ---
 async function getQuantumIndex(max) {
   try {
     const url = `https://qrng.anu.edu.au/API/jsonI.php?length=1&type=uint16`;
     const res = await fetch(url);
     const data = await res.json();
     if (data.success && Array.isArray(data.data) && data.data.length === 1) {
-      // Scale quantum number to desired range (0, ..., max-1)
       return data.data[0] % max;
     }
     throw Error("Quantum fail");
@@ -55,14 +67,13 @@ app.get('/get-verse', async (req, res) => {
       });
       return;
     } else {
-      // Fallback: random Bible verse if Liber not present (with clear mode label)
+      // Fallback: random Bible verse if Liber not present
       index = Math.floor(Math.random() * numVerses);
       mode = 'bible-pseudo';
     }
   }
 
-  // Return Bible verse (quantum or pseudo)
-  const verseObj = kjv[index];
+  const verseObj = flatKJV[index];
   res.json({
     mode,
     book: verseObj.book,
