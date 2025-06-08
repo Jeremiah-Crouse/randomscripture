@@ -1,0 +1,13 @@
+{
+  "name": "spirit-reader",
+  "version": "1.0.0",
+  "description": "Spirit-Reader: Quantum random scripture/Liber Legis reader",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "node-fetch": "^2.6.12"
+  }
+}
