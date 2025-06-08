@@ -7,7 +7,8 @@
     body { font-family:sans-serif; background: #22223a; color:#fff; text-align:center; padding: 2em;}
     button { font-size:1.2em; margin: 2em; padding: 0.6em 1.7em; border-radius:7px; background:#4b57d1; color:#fff; border:none;}
     .reading { background:#29297a; border-radius:13px; display:inline-block; margin-top:2em; padding:2em 3em;}
-    .mode { color:#ffd700; }
+    .mode { color:#ffd700; font-size: 1.08em;}
+    .liber-meta { color: #1dc3d6; }
   </style>
 </head>
 <body>
@@ -23,17 +24,17 @@
         const res = await fetch('/get-verse');
         const data = await res.json();
         document.getElementById('status').textContent = "";
-        if(data.mode === 'bible') {
+        if(data.mode === 'bible' || data.mode === 'bible-pseudo' || data.mode === 'bible (pseudo)') {
           document.getElementById('reading').innerHTML = `<div class="reading">
-            <div class="mode">Bible Mode (Quantum)</div>
+            <div class="mode">Bible Mode ${data.mode.includes('pseudo') ? '(Fallback)' : '(Quantum)'}</div>
             <div><b>${data.book} ${data.chapter}:${data.verse}</b></div>
-            <div style="margin:1em 0;color:#ffd;">${data.text || "(No verse found)"}</div>
+            <div style="margin:1em 0;color:#ffd;">${data.text || "(No verse found)"}<br/></div>
           </div>`;
-        } else {
+        } else if(data.mode === 'liber') {
           document.getElementById('reading').innerHTML = `<div class="reading">
-            <div class="mode">Liber Legis Mode (Pseudo)</div>
-            <div><b>Section ${data.section}, Verse ${data.verse}</b></div>
-            <div style="margin:1em 0;color:#ffd;">${data.text || "(No verse found)"}</div>
+            <div class="mode">Liber Legis Mode (Fallback)</div>
+            <div class="liber-meta"><b>Section ${data.section}, Verse ${data.verse}</b></div>
+            <div style="margin:1em 0;color:#ffd;">${data.text || "(No verse found)"}<br/></div>
           </div>`;
         }
       } catch(e) {
